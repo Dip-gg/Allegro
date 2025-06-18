@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <!-- <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}"> -->
+    <title>Alegro DashBoard</title>
+    <style>
+        @font-face {
+            font-family: Bahnschrift;
+            font-name: Bahnschrift Condensed;
+            src: url(../fonts/BAHNSCHRIFT.TTF);
+        }
+
+        body {
+            font-family: Bahnschrift Condensed;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        .navbar {
+            box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+            padding-top: 10px;
+        }
+
+        .navbar-brand {
+            padding: 0;
+        }
+
+        .navbar-brand h2 {
+            background: linear-gradient(81.71deg, #0000ff -7.83%, #8200de 75.36%, #ff6432 151.37%);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+        }
+
+        .logo {
+            height: 45px;
+            width: 150px;
+            /* clip-path: inset(10px 15px 10px 15px); */
+        }
+
+        .sidebar-container {
+            position: fixed;
+            height: 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            transition: 0.5s;
+            /* Smooth transition for hide/reveal */
+            transform: translateX(0);
+            /* Default state */
+        }
+
+        .sidebar {
+            display: flex;
+            width: 50px;
+            /* Adjusted width for better visibility */
+            height: 100%;
+            padding-top: 30%;
+            left: 0;
+            top: 0;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-right: 2px solid #c5c5c5;
+            transition: 0.5s;
+            transform: translateX(0);
+        }
+
+        .sidebar.sidebar-hide {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-container .hide {
+            transform: translateX(-100%);
+            /* Move sidebar out of view by its width */
+        }
+
+        .sidebar-link {
+            transform: rotate(270deg);
+            margin: 25px 15px;
+            padding: 0px 10px;
+            font-size: large;
+            font-weight: bold;
+            text-decoration: none;
+            color: #6b6b6b;
+            width: 8.5rem;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            bottom: 0;
+            left: -11px;
+        }
+
+        .sidebar-control {
+            display: flex;
+            width: 50px;
+            /* Adjusted width for better visibility */
+            height: 100%;
+            left: 0;
+            top: 0;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+            transition: 0.5s;
+            /* Smooth transition for hide/reveal */
+            transform: translateX(0);
+            /* Default state */
+        }
+
+        .upper {
+            height: 5px;
+            width: 30px;
+            background-color: #aaaaaa;
+            transform: rotate(90deg);
+            margin: 20px;
+            transition: 0.5s;
+            cursor: pointer;
+            visibility: hidden;
+        }
+
+        .lower {
+            height: 5px;
+            width: 30px;
+            background-color: #aaaaaa;
+            transform: rotate(90deg);
+            margin: 20px;
+            transition: 0.5s;
+            cursor: pointer;
+            visibility: hidden;
+        }
+
+        .upper-arrow {
+            transform: rotate(60deg);
+            visibility: visible !important;
+        }
+
+        .lower-arrow {
+            transform: rotate(120deg);
+            visibility: visible !important;
+        }
+
+        .selected-app {
+            display: flex !important;
+            justify-content: center;
+            margin-top: 100px;
+            background-color: #bebebe;
+            color: #004B93 !important;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .modal.fade.show {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: #FFF;
+        }
+
+        .menu-icon {
+            height: 20px;
+            width: 20px;
+        }
+
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding-top: 1rem;
+        }
+
+        .nav-link {
+            border: none !important;
+            min-width: 100px;
+            color: gray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .active {
+            font-size: larger;
+            font-weight: bold;
+            background-color: #f0f0f0 !important;
+            color: #004B93 !important;
+        }
+
+        .right-nav-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background-color: #0000ff;
+        }
+
+        .search-list {
+            position: absolute;
+            z-index: 10;
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+
+        .list-group-item:hover {
+            background-color: #f4f4f4;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .shown {
+            display: block;
+        }
+
+        .inner {
+            width: 80%;
+            height: 1px;
+            margin: 0px auto;
+            border-bottom: 1px solid #969696;
+        }
+
+        .pinned-option-holder {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            box-shadow: rgba(0, 0, 0, 0.24) 0px 4px 2px;
+            align-items: center;
+        }
+
+        .pinned-option-holder .options {
+            margin: 0 0.5rem;
+        }
+
+        .card-holder {
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 2rem;
+            margin-bottom: 5rem;
+            background-color: #f0f0f0;
+            border-radius: 0px 0px 8px 8px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 13rem;
+            /* overflow: hidden; */
+            box-shadow: rgb(100, 100, 111) 0px 2px 10px 0px;
+        }
+
+        .card .header {
+            padding: 10px;
+            display: flex;
+            height: 3rem;
+            justify-content: space-between;
+            align-items: center;
+            /* border-bottom: 2px solid #000; */
+        }
+
+        .card .status-yellow {
+            border-radius: 5px 5px 0px 0px;
+            background-image: linear-gradient(#ff9300, #FF671F);
+            position: relative;
+        }
+
+        .card .status-green {
+            border-radius: 5px 5px 0px 0px;
+            background-image: linear-gradient(#1bb93e, #5ff077);
+            position: relative;
+        }
+
+        .card .status-red {
+            border-radius: 5px 5px 0px 0px;
+            background-image: linear-gradient(#F40009, #CE3D42);
+            position: relative;
+        }
+
+        .status {
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 30px;
+            right: 5%;
+            box-shadow: rgb(100, 100, 111) 0px 2px 10px 0px;
+        }
+
+        .card .status-icon {
+            width: 45px;
+            height: 45px;
+        }
+
+        .card .header-info {
+            min-width: 45%;
+            display: flex;
+            align-content: center;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card .branch-status {
+            color: #585858;
+            font-size: medium;
+            font-weight: 400;
+            margin-bottom: 0;
+        }
+
+        .card .link-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .card .body {
+            margin-left: 0.5rem;
+            position: relative;
+            height: 100%;
+        }
+
+        .card .body-data {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .card .body p {
+            font-size: medium;
+            margin: 0;
+        }
+
+        .card .expand {
+            cursor: pointer;
+            height: 25px;
+            right: 5%;
+            top: 5%;
+            position: absolute;
+            z-index: 10;
+        }
+
+
+        .dropdown {
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+        }
+
+        /* Adjust dropdown trigger to ensure it works properly */
+        .dropdown .details {
+            position: relative;
+            z-index: 10;
+            padding-right: 15px;
+            padding-left: 20px;
+            height: 20px;
+        }
+
+        .item {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .env-dropdown .item {
+            margin-left: 10px;
+        }
+
+        .env-dropdown .item .dropdown-item {
+            padding-left: 0;
+        }
+
+        .GREEN {
+            background-color: #1bb93e;
+        }
+
+        .RED {
+            background-color: #CE3D42;
+        }
+
+        .AMBER {
+            background-color: #ff9300;
+
+        }
+
+        .BLUE {
+            background-color: #004B93;
+        }
+
+        .GREY {
+            background-color: #717073;
+        }
+
+        .build-number {
+            font-size: large;
+            color: #fff;
+        }
+
+        .expand-btn {
+            cursor: pointer !important;
+        }
+
+        .expand {
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .pin {
+            height: 18px;
+            width: 18px;
+            cursor: pointer;
+            right: 5%;
+            top: 5%;
+            position: absolute;
+        }
+
+        .green-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#046A38, #339933);
+            /* background-image: linear-gradient(#F4B000, #FDD835); */
+        }
+
+        .red-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#CE3D42, #F40009);
+        }
+
+        .amber-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#FF671F, #ff9300);
+
+        }
+
+        .blue-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#004B93, #007CB4);
+        }
+
+        .yellow-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#F4B000, #FDD835);
+        }
+
+        .brown-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#866D4B, #B88746);
+        }
+
+        .gray-grad {
+            border-radius: 8px 8px 0px 0px;
+            background-image: linear-gradient(#717073, #D1D3D4);
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 10;
+            background-color: #f8f9fa;
+            border-top: 2px solid #c5c5c5;
+        }
+
+        /* #data-table_wrapper {
+            display: none;
+        } */
+
+        .hostname {
+            /* background-color: #0000ff; */
+            color: #fff;
+            padding: 5px;
+            margin-left: 2px;
+            border-radius: 5px;
+            line-height: 30px;
+        }
+
+        .hostname-found {
+            background-color: rgba(0, 128, 0, 0.7)
+        }
+
+        .hostname-not-found {
+            background-color: rgba(134, 0, 0, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <h2>Allegro Matrix</h2>
+            </a>
+            <img class="logo" src="static/images/logo.svg" alt="logo">
+        </div>
+    </nav>
+    <div class="container body-container">
+        <div class="tab-container">
+            <ul class="nav nav-tabs select-tab">
+                <!-- <li class="nav-item">
+                    <a class="nav-link group-link" aria-current="page" href="#" data-db-type="all">All</a>
+                </li> -->
+            </ul>
+            <div class="right-nav-container">
+                <form class="d-flex search-bar" role="search" id="form">
+                    <!-- <input id="searchInput" class="form-control me-2" type="search" placeholder="Env"
+                        aria-label="Search" autocomplete="off"> -->
+                </form>
+            </div>
+        </div>
+        <div class="container card-holder">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border card-spinner" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div id="card-container"
+                class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-lg-5 row-cols-xl-6  g-2 g-lg-3">
+            </div>
+            <table id="data-table" class="display" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Summary</th>
+                        <th>Env Name</th>
+                        <th>Env Owner</th>
+                        <th>Env Purpose</th>
+                        <th>DB Name</th>
+                        <th>Horizon Version</th>
+                        <th>Last Refreshed</th>
+                        <th>Project/Activity/Key</th>
+                        <th>TNS Listener</th>
+                        <th>Active Connections</th>
+                        <th>Target Completion Date</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be populated here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header custom-modal-header">
+                    <h2 class="modal-title" id="detailsModalLabel">Modal Title</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="modal-table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-body-content">
+                            <!-- Data will be populated here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="sidebar-container">
+        <div class="sidebar">
+            <a class="sidebar-link" id="alegro" href="/home">Allegro</a>
+            <a class="sidebar-link selected-app" id="algExt" href="/external">Allegro EXT</a>
+            <div style="height: 20%; margin-top: 2rem; position: relative;">
+                <div class="sidebar-close" id="sidebarCloseButton">
+                    <button type="button" class="btn-close btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-control">
+            <div id="toggleSidebarButton">
+                <div class="upper"></div>
+                <div class="lower"></div>
+            </div>
+        </div>
+    </div> -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- <script src="{{url_for('static', filename='js/script.js')}}"></script> -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bodySpinner = document.querySelector('.card-spinner');
+            const cardContainer = document.getElementById('card-container');
+
+            let storedData = {};
+            let filteredEnvironments = [];
+            let dataTableInstance = null;
+            let modalTableInstance = null;
+
+            function hideCardSpinner() {
+                bodySpinner.style.display = 'none';
+            }
+
+            async function fetchData() {
+                try {
+                    const response = await fetch('data.json');
+                    if (!response.ok) {
+                        throw new Error('Network response failed')
+                    }
+
+                    const responseData = await response.json();
+                    console.log('Fetched Data: '.responseData);
+
+                    storedData = responseData;
+                    generateCards(storedData);
+                } catch (error) {
+                    console.error('Failed to fetch data: ', error);
+                } finally {
+                    hideCardSpinner();
+                }
+            }
+
+            function generateCards(data) {
+                console.log('Generate Cards');
+                filteredEnvironments = Object.values(data.issues);
+                initializeTableAndCards();
+                initailizeExpandIcons();
+            }
+
+            function initailizeExpandIcons() {
+                // console.log("inside Initialize Expand Icons")
+                const expandIcons = document.querySelectorAll('.expand');
+                // console.log(expandIcons);
+                expandIcons.forEach(icon => {
+                    icon.addEventListener('click', function (event) {
+                        const environmentName = this.closest('.card').querySelector('.build-number').innerText;
+                        if (environmentName) {
+                            console.log("Env Name: " + environmentName);
+                            selectedEnvName = environmentName;
+                            initializeModal();
+                        } else {
+                            console.log("No environment name found");
+                        }
+                    });
+                });
+            }
+
+            function initializeModal() {
+                console.log("Inside Initialize modal");
+                const modalHeaderClass = 'blue-grad';
+                const currentEnvironmentName = filteredEnvironments.find(env => env.fields.customfield_10310.value === selectedEnvName);
+                console.log("Current Environment: " + currentEnvironmentName.fields.customfield_10310.value);
+
+                document.getElementById('detailsModalLabel').innerText = selectedEnvName;
+                const modalHeader = document.querySelector('#detailsModal .modal-header');
+                if (modalHeader) {
+                    modalHeader.className = `modal-header ${modalHeaderClass} custom-modal-header`;
+                } else {
+                    console.log('No environment found for selected environment');
+                }
+                populateModalTable();
+            }
+
+            // Helper function to remove keys with null values recursively
+            function filterNulls(obj) {
+                if (Array.isArray(obj)) {
+                    return obj.map(item => filterNulls(item));
+                } else if (typeof obj === "object" && obj !== null) {
+                    const result = {};
+                    for (let k in obj) {
+                        if (obj.hasOwnProperty(k) && obj[k] !== null) {
+                            result[k] = filterNulls(obj[k]);
+                        }
+                    }
+                    return result;
+                } else {
+                    return obj;
+                }
+            }
+
+            // Helper function to create an HTML subtable from an object
+            function createSubtable(obj) {
+                let html = `<table class="subtable" style="width:100%; border:1px solid #ccc; margin-top:10px;">`;
+                for (let k in obj) {
+                    if (obj.hasOwnProperty(k)) {
+                        let val = obj[k];
+                        if (typeof val === "object" && val !== null) {
+                            // For nested objects, we simply stringify (or you can recursively create another subtable)
+                            val = JSON.stringify(val, null, 2);
+                        }
+                        html += `
+                            <tr>
+                                <td style="font-weight: bold; vertical-align: top;">${k}</td>
+                                <td style="white-space: pre-wrap;">${val}</td>
+                            </tr>
+                        `;
+                    }
+                }
+                html += `</table>`;
+                return html;
+            }
+
+            function populateModalTable() {
+                console.log(storedData);
+                const currentEnvironment = filteredEnvironments.find(
+                    env => env.fields.customfield_10310.value === selectedEnvName
+                );
+                console.log(currentEnvironment);
+
+                if (!currentEnvironment) {
+                    console.error("No Environment found with name: " + selectedEnvName);
+                    return;
+                }
+
+                // Destroy any existing DataTable instance if used (or clear previous content)
+                if (modalTableInstance) {
+                    modalTableInstance.clear().destroy();
+                    modalTableInstance = null;
+                }
+
+                const modalTableBody = $('#modal-body-content');
+                modalTableBody.empty();
+
+                // const dataToDisplay = currentEnvironment;
+
+                const dataToDisplay = {
+                    summary: currentEnvironment.fields.summary,
+                    env_name: currentEnvironment.fields.customfield_10310.value,
+                    env_owner: currentEnvironment.fields.customfield_10107,
+                    env_purpose: currentEnvironment.fields.customfield_10305,
+                    db_name: currentEnvironment.fields.customfield_11601.value,
+                    horizon_version: currentEnvironment.fields.customfield_11602,
+                    last_refreshed: currentEnvironment.fields.customfield_11603,
+                    project: currentEnvironment.fields.customfield_11604,
+                    tns_listner: currentEnvironment.fields.customfield_10910.value,
+                    active_connections: currentEnvironment.fields.customfield_11700,
+                    env_end_date: currentEnvironment.fields.customfield_10409,
+                    comments: currentEnvironment.fields.customfield_10419
+                };
+
+                for (let key in dataToDisplay) {
+                    if (dataToDisplay.hasOwnProperty(key)) {
+                        let value = dataToDisplay[key];
+
+                        // For the "fields" key, create a subtable of its key/value pairs
+                        if (key === "fields" && typeof value === "object" && value !== null) {
+                            value = createSubtable(filterNulls(value));
+                        } else if (typeof value === "object" && value !== null) {
+                            // For other objects, optionally display as JSON
+                            value = JSON.stringify(filterNulls(value), null, 2);
+                        }
+
+                        const row = `
+                            <tr>
+                                <td style="font-weight: bold;">${key}</td>
+                                <td>${value}</td>
+                            </tr>
+                        `;
+                        modalTableBody.append(row);
+                    }
+                }
+                
+                $('#modal-table').DataTable();
+            }
+
+
+            function initializeTableAndCards() {
+                console.log('inside initialze table');
+                console.log(filteredEnvironments);
+
+                const tableData = filteredEnvironments.map(env => {
+
+                    return {
+                        summary: env.fields.summary,
+                        env_name: env.fields.customfield_10310.value,
+                        env_owner: env.fields.customfield_10107,
+                        env_purpose: env.fields.customfield_10305,
+                        db_name: env.fields.customfield_11601.value,
+                        horizon_version: env.fields.customfield_11602,
+                        last_refreshed: env.fields.customfield_11603,
+                        project: env.fields.customfield_11604,
+                        tns_listner: env.fields.customfield_10910.value,
+                        active_connections: env.fields.customfield_11700,
+                        env_end_date: env.fields.customfield_10409,
+                        comments: env.fields.customfield_10419
+                    }
+                });
+
+                if (dataTableInstance) {
+                    dataTableInstance.clear().destroy();
+                }
+
+                dataTableInstance = $('#data-table').DataTable({
+                    dom: 'frt',
+                    destroy: true,
+                    data: tableData,
+                    language: {
+                        searchPlaceholder: 'Search'
+                    },
+                    columns: [
+                        { data: "summary", title: "Summary" },
+                        { data: "env_name", title: "Env Name" },
+                        { data: "env_owner", title: "Env Owner" },
+                        { data: "env_purpose", title: "Env Purpose" },
+                        { data: "db_name", title: "DB Name" },
+                        { data: "horizon_version", title: "Horizon Version" },
+                        { data: "last_refreshed", title: "Last Refreshed" },
+                        { data: "project", title: "Project/Activity/Key" },
+                        { data: "tns_listner", title: "TNS Listener" },
+                        { data: "active_connections", title: "Active Connections" },
+                        { data: "env_end_date", title: "Target Completion Date" },
+                        { data: "comments", title: "Comments" }
+                    ]
+                });
+
+                function createCard(env, index) {
+                    const card = document.createElement('div');
+                    card.className = 'col';
+
+                    let headerClass = 'blue-grad';
+
+                    let cardContent = `
+                        <div class="card">
+                            <div class="header ${headerClass}">
+                                <div class="header-info">
+                                    <div class="build-number">
+                                        ${env.fields.customfield_10310.value}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="body">
+                                <p>Owner: <strong>${env.fields.customfield_10107}</strong></p>
+                                <p>Purpose: ${env.fields.customfield_10305}</p>
+                                <p>DB Name: ${env.fields.customfield_11601.value}</p>
+                                <p>Last Refreshed: ${env.fields.customfield_11603}</p>
+                            </div>
+                            <img class="expand view-details"
+                                src="static/images/icons8-external-link-48.png" data-index="${index}"
+                                data-bs-toggle="modal" data-bs-target="#detailsModal">
+                        </div>
+	                `;
+
+                    card.innerHTML = cardContent;
+                    return card
+                }
+
+                filteredEnvironments.forEach((env, index) => {
+                    const card = createCard(env, index);
+                    cardContainer.appendChild(card);
+                })
+
+                $('.dataTables_filter input').attr('type', 'text');
+
+                // Select all instances of data-table_filter
+                const datatableFilters = document.querySelectorAll('#data-table_filter');
+
+                if (datatableFilters.length > 1) {
+                    // Remove the second instance (index 1) if present
+                    datatableFilters[1].remove();
+                    console.log('Second instance of data-table_filter removed');
+                } else {
+                    console.log('No duplicate data-table_filter found');
+                }
+
+                // Move the remaining (first) DataTable filter to the right-nav-container
+                const datatableFilter = datatableFilters[0]; // Use the first (remaining) instance
+                const form = document.getElementById('form');
+                if (form !== null) {
+                    form.remove(); // Remove the form if it exists
+                }
+
+                const rightNavContainer = document.querySelector('.right-nav-container');
+                if (rightNavContainer && datatableFilter) {
+                    rightNavContainer.appendChild(datatableFilter); // Append the filter to the right-nav-container
+                    document.querySelector('#data-table_filter label').childNodes[0].nodeValue = ''; // Clear the label's child text node value
+                } else {
+                    console.error('Right nav container or DataTable filter element is missing');
+                }
+
+                // Custom search handling to filter cards based on DataTable search
+                $('#data-table_filter input').on('keyup', function () {
+                    var searchValue = this.value.trim();
+
+                    // Log the search value for debugging
+                    console.log("Search Value: " + searchValue);
+
+                    // If search is empty, show all cards and exit early
+                    if (searchValue === '') {
+                        $('#card-container .col').addClass('shown').show();
+                        console.log("Number of visible cards (after clear): " + $('#card-container .col:visible').length);
+                        // cardCount.innerHTML = 'Showing ' + $('#card-container .col.shown').length + " of " + totalCount;
+                        return;
+                    }
+
+                    // Perform DataTable search
+                    // table.search(searchValue).draw();
+
+                    // Hide all cards first
+                    $('#card-container .col').removeClass('shown').hide();
+
+                    // Debug: Print the count of hidden cards
+                    console.log("Number of hidden cards: " + $('#card-container .col:hidden').length);
+
+                    // Create a Set to store unique project keys
+                    var uniqueProjectKeys = new Set();
+
+                    // Collect unique project keys from the filtered DataTable rows
+                    dataTableInstance.rows({ filter: 'applied' }).every(function () {
+                        var rowData = this.data();
+                        uniqueProjectKeys.add(rowData["env_name"]); // Assuming 'key' is the field in DataTable
+                    });
+
+                    // Log unique project keys for debugging
+                    console.log("Unique project keys: ", Array.from(uniqueProjectKeys));
+
+                    // Show only the cards that match the unique project keys
+                    $('#card-container .card').each(function () {
+                        var card = $(this);
+                        var projectKey = card.find('.build-number').text().trim(); // Get the project key from the card
+
+                        // Debug: Log each card and its project key
+                        console.log("Card project key: " + projectKey);
+
+                        // Show the card if its project key is in the Set
+                        if (uniqueProjectKeys.has(projectKey)) {
+                            console.log(card.parent())
+                            card.parent().addClass('shown').show(); // Only show its direct parent (the .col)
+                            console.log("Showing card for project key: " + projectKey);
+                        }
+                    });
+
+                    // Log the number of visible cards after filtering
+                    console.log("Number of visible cards (after filtering): " + $('#card-container .col.shown').length);
+                    // cardCount.innerHTML = 'Showing ' + $('#card-container .col.shown').length + " of " + totalCount;
+
+                    // Add dummy cards if the number of displayed cards is less than 5
+                    // addDummyCards();
+                });
+            }
+
+            fetchData();
+        })
+    </script>
+</body>
+
+</html>
